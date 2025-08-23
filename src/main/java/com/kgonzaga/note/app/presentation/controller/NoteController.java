@@ -3,11 +3,13 @@ package com.kgonzaga.note.app.presentation.controller;
 import com.kgonzaga.note.app.presentation.dto.NoteCreateRequest;
 import com.kgonzaga.note.app.presentation.dto.NoteResponse;
 import com.kgonzaga.note.app.presentation.dto.NoteUpdateRequest;
+import com.kgonzaga.note.app.presentation.dto.PagedResponse;
 import com.kgonzaga.note.app.service.NoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +39,19 @@ public class NoteController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<NoteResponse>> getAllNotes(Pageable pageable) {
+    public ResponseEntity<PagedResponse<NoteResponse>> getAllNotes(
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
         Page<NoteResponse> page = noteService.getAllNotes(pageable);
-        return ResponseEntity.ok(page);
+
+        PagedResponse<NoteResponse> response = new PagedResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
