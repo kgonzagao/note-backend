@@ -6,8 +6,6 @@ import com.kgonzaga.note.app.presentation.dto.NoteUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
-
 public interface NoteService {
 
     NoteResponse createNote(NoteCreateRequest request);
