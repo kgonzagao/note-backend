@@ -10,16 +10,16 @@ public class NoteMapper {
 
     public Note fromCreateRequest(NoteCreateRequest request) {
         return Note.builder()
-                .title(request.title())
-                .content(request.content())
+                .title(request.title().trim())
+                .content(request.content().trim())
                 .build();
     }
 
     public NoteResponse toResponse(Note note) {
         return new NoteResponse(
                 note.getId(),
-                note.getTitle(),
-                note.getContent(),
+                note.getTitle().trim(),
+                note.getContent().trim(),
                 note.getCreatedAt(),
                 note.getUpdatedAt()
         );

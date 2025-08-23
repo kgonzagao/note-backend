@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class NoteServiceImpl implements NoteService {
     @Override
     @Transactional
     public NoteResponse createNote(NoteCreateRequest request) {
+        if (repository.existsByTitleIgnoreCase(request.title().trim())) {
+            throw new DataIntegrityViolationException("Exception create unique");
+        }
         log.info("Creating new note: {}", request.title());
         Note saved = repository.save(mapper.fromCreateRequest(request));
         return mapper.toResponse(saved);
@@ -39,10 +43,14 @@ public class NoteServiceImpl implements NoteService {
     @Override
     @Transactional
     public NoteResponse updateNote(NoteUpdateRequest request) {
-        log.info("Updating note with ID: {}", request.id());
         Note existing = repository.findById(request.id())
                 .orElseThrow(() -> new NoteNotFoundException(request.id()));
 
+        if (repository.existsByTitleIgnoreCaseAndIdNot(request.title().trim(), request.id())) {
+            throw new DataIntegrityViolationException("Exception update unique");
+        }
+
+        log.info("Updating note with ID: {}", request.id());
         existing.setTitle(request.title());
         existing.setContent(request.content());
 
@@ -71,10 +79,10 @@ public class NoteServiceImpl implements NoteService {
     @Override
     @Transactional
     public void deleteNoteById(Long id) {
-        log.info("Deleting note with ID: {}", id);
         if (!repository.existsById(id)) {
             throw new NoteNotFoundException(id);
         }
+        log.info("Deleting note with ID: {}", id);
         repository.deleteById(id);
     }
 }
