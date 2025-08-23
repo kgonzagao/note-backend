@@ -1,0 +1,7 @@
+CREATE TABLE notes (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) UNIQUE,
+  content TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
