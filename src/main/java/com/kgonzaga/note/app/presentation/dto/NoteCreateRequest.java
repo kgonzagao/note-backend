@@ -1,9 +1,6 @@
 package com.kgonzaga.note.app.presentation.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import java.util.Optional;
+import jakarta.validation.constraints.*;
 
 public record NoteCreateRequest(
         @NotBlank

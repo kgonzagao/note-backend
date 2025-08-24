@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +24,15 @@ public class GlobalExceptionHandler {
         this.dateTimeUtils = dateTimeUtils;
     }
 
-    // 1. Custom handler for not found exception
-    @ExceptionHandler(NoteNotFoundException.class)
-    public ResponseEntity<?> handleNoteNotFound(NoteNotFoundException ex) {
+    // 1. Custom handler for not found exception and duplicate
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleNotFound(ResourceNotFoundException ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<?> handleDuplicate(DuplicateResourceException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Duplicate Resource", ex.getMessage());
     }
 
     // 2. Handles validation errors from @Valid in controllers (DTOs)
@@ -102,6 +108,12 @@ public class GlobalExceptionHandler {
                 "Bad Request",
                 "Request body is required and was not provided."
         );
+    }
+
+    // 8. Custom handler for Username not found exception
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFound(UsernameNotFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Username Not Found", ex.getMessage());
     }
 
     // Utility method for building consistent error responses

@@ -1,13 +1,13 @@
 package com.kgonzaga.note.app.service.impl;
 
 import com.kgonzaga.note.app.exception.ResourceNotFoundException;
-import com.kgonzaga.note.app.persistence.entity.Note;
-import com.kgonzaga.note.app.persistence.repository.NoteRepository;
-import com.kgonzaga.note.app.presentation.dto.NoteCreateRequest;
-import com.kgonzaga.note.app.presentation.dto.NoteResponse;
-import com.kgonzaga.note.app.presentation.dto.NoteUpdateRequest;
-import com.kgonzaga.note.app.service.NoteService;
-import com.kgonzaga.note.app.util.mapper.NoteMapper;
+import com.kgonzaga.note.app.persistence.entity.RoleApp;
+import com.kgonzaga.note.app.persistence.repository.RoleRepository;
+import com.kgonzaga.note.app.presentation.dto.RoleCreateRequest;
+import com.kgonzaga.note.app.presentation.dto.RoleResponse;
+import com.kgonzaga.note.app.presentation.dto.RoleUpdateRequest;
+import com.kgonzaga.note.app.service.RoleService;
+import com.kgonzaga.note.app.util.mapper.RoleMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -21,40 +21,40 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NoteServiceImpl implements NoteService {
+public class RoleServiceImpl implements RoleService {
 
-    private final NoteRepository repository;
-    private final NoteMapper mapper;
+    private final RoleRepository repository;
+    private final RoleMapper mapper;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     @Transactional
-    public NoteResponse createNote(NoteCreateRequest request) {
-        if (repository.existsByTitleIgnoreCase(request.title().trim())) {
+    public RoleResponse createRol(RoleCreateRequest request) {
+        if (repository.existsByNameIgnoreCase(request.name().trim())) {
             throw new DataIntegrityViolationException("Exception create unique");
         }
-        log.info("Creating new note: {}", request.title());
-        Note saved = repository.save(mapper.fromCreateRequest(request));
+        log.info("Creating new rol: {}", request.name());
+        RoleApp saved = repository.save(mapper.fromCreateRequest(request));
         return mapper.toResponse(saved);
     }
 
     @Override
     @Transactional
-    public NoteResponse updateNote(NoteUpdateRequest request) {
-        Note existing = repository.findById(request.id())
+    public RoleResponse updateRol(RoleUpdateRequest request) {
+        RoleApp existing = repository.findById(request.id())
                 .orElseThrow(() -> new ResourceNotFoundException(request.id()));
 
-        if (repository.existsByTitleIgnoreCaseAndIdNot(request.title().trim(), request.id())) {
+        if (repository.existsByNameIgnoreCaseAndIdNot(request.name().trim(), request.id())) {
             throw new DataIntegrityViolationException("Exception update unique");
         }
 
-        log.info("Updating note with ID: {}", request.id());
-        existing.setTitle(request.title());
-        existing.setContent(request.content());
+        log.info("Updating rol with ID: {}", request.id());
+        existing.setName(request.name());
+        existing.setDescription(request.description());
 
-        Note saved = repository.save(existing);
+        RoleApp saved = repository.save(existing);
         entityManager.flush();
         entityManager.refresh(saved);
         return mapper.toResponse(saved);
@@ -62,8 +62,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     @Transactional(readOnly = true)
-    public NoteResponse getNoteById(Long id) {
-        log.info("Searching for note with ID: {}", id);
+    public RoleResponse getRolById(Long id) {
+        log.info("Searching for role with ID: {}", id);
         return repository.findById(id)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
@@ -71,18 +71,18 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NoteResponse> getAllNotes(Pageable pageable) {
-        log.info("Listing notes with pagination: page {}, size {}", pageable.getPageNumber(), pageable.getPageSize());
+    public Page<RoleResponse> getAllRoles(Pageable pageable) {
+        log.info("Listing rol with pagination: page {}, size {}", pageable.getPageNumber(), pageable.getPageSize());
         return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
     @Transactional
-    public void deleteNoteById(Long id) {
+    public void deleteRolById(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(id);
         }
-        log.info("Deleting note with ID: {}", id);
+        log.info("Deleting rol with ID: {}", id);
         repository.deleteById(id);
     }
 }

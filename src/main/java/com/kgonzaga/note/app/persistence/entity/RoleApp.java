@@ -11,27 +11,27 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notes")
+@Table(name = "role_app")
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Note implements Serializable {
+public class RoleApp implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1001L;
+    private static final long serialVersionUID = 1002L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50, unique = true)
-    private String title;
+    @Column(unique = true, nullable = false, length = 25)
+    private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(length = 500)
+    private String description;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
