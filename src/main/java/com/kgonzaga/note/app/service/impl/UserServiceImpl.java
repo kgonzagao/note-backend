@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -46,7 +48,7 @@ public class UserServiceImpl implements UserService {
         log.info("Creating user dni: {}, username: {}", request.dni(), request.username());
         var roles = roleRepository.findAllById(request.roleIds());
         var user = mapper.fromCreateRequest(request);
-        user.setPassword(request.password());//TODO bycryp
+        user.setPassword(passwordEncoder.encode(request.password()));
         user.setRoles(new HashSet<>(roles));
         UserApp saved = userRepository.save(user);
         return mapper.toResponse(saved);
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(request.username().trim());
 
         if (request.password() != null && !request.password().isBlank()) {
-            user.setPassword(request.password()); // TODO: cifrar con BCrypt
+            user.setPassword(passwordEncoder.encode(request.password()));
         }
 
         if (request.enabled() != null) {
