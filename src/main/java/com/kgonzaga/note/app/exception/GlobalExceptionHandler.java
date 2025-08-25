@@ -1,6 +1,7 @@
 package com.kgonzaga.note.app.exception;
 
 import com.kgonzaga.note.app.util.DateTimeUtils;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -126,6 +127,12 @@ public class GlobalExceptionHandler implements AccessDeniedHandler {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Authentication", ex.getMessage());
     }
 
+    // 10. Custom handler for JWT exception
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<?> handleJwt(JwtException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getClass().getSimpleName(), ex.getMessage());
+    }
+
     // Utility method for building consistent error responses
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String error, String message) {
         Map<String, Object> body = Map.of(
@@ -141,7 +148,7 @@ public class GlobalExceptionHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType("application/json");
-        
+
         String json = String.format("""
                 {
                   "timestamp": "%s",

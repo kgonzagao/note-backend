@@ -50,10 +50,10 @@ public class JwtServiceImpl implements JwtService {
                     .build()
                     .parseSignedClaims(token);
             return true;
-        } catch (Exception e) {
-            log.info("Token invalid {}", token);
+        } catch (JwtException ex) {
+            log.info("Token invalid: {}", token);
+            throw new JwtException(ex.getMessage());
         }
-        return false;
     }
 
     @Override
