@@ -36,10 +36,10 @@ INSERT INTO role_app (name, description, created_at, updated_at) VALUES
 
 INSERT INTO user_app (full_name, dni, username, password, enabled, created_at, updated_at) VALUES
   ('Kevin Gonzaga', '12345678', 'kgonzaga',
-    '$2a$10$N3j6fYgU3NqbQTxkfrq6ZuvPL9W8T0F0wUpmUONxLuZYRx2XHLKmK', -- user123
+    '$2a$10$jKevTtqxObz3jtgWNQSuoOxGGnfG3L56I0e3RCgxT0bWNP5rMlJfO', -- clave123
     TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('Admin User', '87654321', 'admin',
-    '$2a$10$qg2KML2T8fxEYyzEO/XeYeY68VbsPArhAfBz2L8aN3O7Ubswh4jii', -- admin123
+    '$2a$10$jKevTtqxObz3jtgWNQSuoOxGGnfG3L56I0e3RCgxT0bWNP5rMlJfO', -- clave123
     TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO user_roles (user_id, role_id) VALUES

@@ -2,6 +2,7 @@ package com.kgonzaga.note.app.auth.service.impl;
 
 import com.kgonzaga.note.app.auth.jwt.JwtService;
 import com.kgonzaga.note.app.auth.service.AuthService;
+import com.kgonzaga.note.app.exception.InvalidCredentialsException;
 import com.kgonzaga.note.app.presentation.dto.AuthResponse;
 import com.kgonzaga.note.app.presentation.dto.LoginRequest;
 import com.kgonzaga.note.app.presentation.dto.RefreshTokenRequest;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,10 +35,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()) {
-                }
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
+            );
+        } catch (AuthenticationException ex) {
+            throw new InvalidCredentialsException(ex.getMessage());
+        }
 
         var userLoad = userService.loadUserByUsername(request.username());
         String accessToken = jwtService.generateAccessToken(userLoad);

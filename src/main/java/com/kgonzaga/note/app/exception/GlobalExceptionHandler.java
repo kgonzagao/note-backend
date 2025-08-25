@@ -116,6 +116,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Username Not Found", ex.getMessage());
     }
 
+    // 9. Custom handler for authentication exception
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<?> handleAuthentication(InvalidCredentialsException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Authentication", ex.getMessage());
+    }
+
     // Utility method for building consistent error responses
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String error, String message) {
         Map<String, Object> body = Map.of(
