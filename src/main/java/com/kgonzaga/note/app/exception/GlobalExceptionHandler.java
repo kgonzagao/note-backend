@@ -1,28 +1,32 @@
 package com.kgonzaga.note.app.exception;
 
 import com.kgonzaga.note.app.util.DateTimeUtils;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+@RequiredArgsConstructor
+public class GlobalExceptionHandler implements AccessDeniedHandler {
 
     private final DateTimeUtils dateTimeUtils;
-
-    public GlobalExceptionHandler(DateTimeUtils dateTimeUtils) {
-        this.dateTimeUtils = dateTimeUtils;
-    }
 
     // 1. Custom handler for not found exception and duplicate
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -132,4 +136,22 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(status).body(body);
     }
+
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType("application/json");
+        
+        String json = String.format("""
+                {
+                  "timestamp": "%s",
+                  "status": 403,
+                  "error": "Forbidden",
+                  "message": "You do not have permission to access this resource"
+                }
+                """, dateTimeUtils.now());
+
+        response.getWriter().write(json);
+    }
+
 }

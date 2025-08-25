@@ -1,6 +1,7 @@
 package com.kgonzaga.note.app.config;
 
 import com.kgonzaga.note.app.auth.jwt.JwtAuthenticationFilter;
+import com.kgonzaga.note.app.exception.GlobalExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,7 +26,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthenticationFilter jwtAuthFilter,
-                                                   UserDetailsService userDetailsService) throws Exception {
+                                                   UserDetailsService userDetailsService,
+                                                   GlobalExceptionHandler exceptionHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -38,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/notes/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
+                        .accessDeniedHandler(exceptionHandler))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
