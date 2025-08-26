@@ -1,11 +1,3 @@
-CREATE TABLE notes (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(50) NOT NULL UNIQUE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL
-);
-
 CREATE TABLE role_app (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -31,4 +23,16 @@ CREATE TABLE user_roles (
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES user_app(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES role_app(id) ON DELETE CASCADE
+);
+
+CREATE TABLE notes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(50) NOT NULL UNIQUE,
+    content TEXT NOT NULL,
+    user_app_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    create_by VARCHAR(100) NOT NULL,
+    updated_at TIMESTAMP DEFAULT NULL,
+    updated_by VARCHAR(100) DEFAULT NULL,
+    CONSTRAINT fk_notes_user_app FOREIGN KEY (user_app_id) REFERENCES user_app(id)
 );

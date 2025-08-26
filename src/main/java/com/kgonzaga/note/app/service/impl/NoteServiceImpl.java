@@ -2,11 +2,13 @@ package com.kgonzaga.note.app.service.impl;
 
 import com.kgonzaga.note.app.exception.ResourceNotFoundException;
 import com.kgonzaga.note.app.persistence.entity.Note;
+import com.kgonzaga.note.app.persistence.entity.UserApp;
 import com.kgonzaga.note.app.persistence.repository.NoteRepository;
 import com.kgonzaga.note.app.presentation.dto.NoteCreateRequest;
 import com.kgonzaga.note.app.presentation.dto.NoteResponse;
 import com.kgonzaga.note.app.presentation.dto.NoteUpdateRequest;
 import com.kgonzaga.note.app.service.NoteService;
+import com.kgonzaga.note.app.service.UserService;
 import com.kgonzaga.note.app.util.mapper.NoteMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository repository;
+    private final UserService userService;
     private final NoteMapper mapper;
 
     @PersistenceContext
@@ -36,7 +41,11 @@ public class NoteServiceImpl implements NoteService {
             throw new DataIntegrityViolationException("Exception create unique");
         }
         log.info("Creating new note: {}", request.title());
-        Note saved = repository.save(mapper.fromCreateRequest(request));
+        var note = mapper.fromCreateRequest(request);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        note.setUserApp((UserApp) userService.loadUserByUsername(auth.getName()));
+        Note saved = repository.save(note);
         return mapper.toResponse(saved);
     }
 
