@@ -2,13 +2,12 @@ package com.kgonzaga.note.app.service.impl;
 
 import com.kgonzaga.note.app.exception.ResourceNotFoundException;
 import com.kgonzaga.note.app.persistence.entity.Note;
-import com.kgonzaga.note.app.persistence.entity.UserApp;
 import com.kgonzaga.note.app.persistence.repository.NoteRepository;
 import com.kgonzaga.note.app.presentation.dto.NoteCreateRequest;
 import com.kgonzaga.note.app.presentation.dto.NoteResponse;
 import com.kgonzaga.note.app.presentation.dto.NoteUpdateRequest;
 import com.kgonzaga.note.app.service.NoteService;
-import com.kgonzaga.note.app.service.UserService;
+import com.kgonzaga.note.app.util.AuthUtil;
 import com.kgonzaga.note.app.util.mapper.NoteMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository repository;
-    private final UserService userService;
     private final NoteMapper mapper;
+    private final AuthUtil authUtil;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -43,8 +40,7 @@ public class NoteServiceImpl implements NoteService {
         log.info("Creating new note: {}", request.title());
         var note = mapper.fromCreateRequest(request);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        note.setUserApp((UserApp) userService.loadUserByUsername(auth.getName()));
+        note.setUserApp(authUtil.getUser());
         Note saved = repository.save(note);
         return mapper.toResponse(saved);
     }
@@ -54,6 +50,10 @@ public class NoteServiceImpl implements NoteService {
     public NoteResponse updateNote(NoteUpdateRequest request) {
         Note existing = repository.findById(request.id())
                 .orElseThrow(() -> new ResourceNotFoundException(request.id()));
+
+        if (!existing.getUserApp().getId().equals(authUtil.getUser().getId())) {
+            throw new ResourceNotFoundException(request.id());
+        }
 
         if (repository.existsByTitleIgnoreCaseAndIdNot(request.title().trim(), request.id())) {
             throw new DataIntegrityViolationException("Exception update unique");
@@ -73,25 +73,33 @@ public class NoteServiceImpl implements NoteService {
     @Transactional(readOnly = true)
     public NoteResponse getNoteById(Long id) {
         log.info("Searching for note with ID: {}", id);
-        return repository.findById(id)
-                .map(mapper::toResponse)
+
+        var note = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        if (!note.getUserApp().getId().equals(authUtil.getUser().getId())) {
+            throw new ResourceNotFoundException(id);
+        }
+        return mapper.toResponse(note);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<NoteResponse> getAllNotes(Pageable pageable) {
         log.info("Listing notes with pagination: page {}, size {}", pageable.getPageNumber(), pageable.getPageSize());
-        return repository.findAll(pageable).map(mapper::toResponse);
+        return repository.findAllByUserApp(pageable, authUtil.getUser()).map(mapper::toResponse);
     }
 
     @Override
     @Transactional
     public void deleteNoteById(Long id) {
-        if (!repository.existsById(id)) {
+        var note = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        if (!note.getUserApp().getId().equals(authUtil.getUser().getId())) {
             throw new ResourceNotFoundException(id);
         }
         log.info("Deleting note with ID: {}", id);
-        repository.deleteById(id);
+        repository.delete(note);
     }
 }
