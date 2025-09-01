@@ -87,7 +87,16 @@ public class NoteServiceImpl implements NoteService {
     @Transactional(readOnly = true)
     public Page<NoteResponse> getAllNotes(Pageable pageable) {
         log.info("Listing notes with pagination: page {}, size {}", pageable.getPageNumber(), pageable.getPageSize());
-        return repository.findAllByUserApp(pageable, authUtil.getUser()).map(mapper::toResponse);
+        var user = authUtil.getUser();
+        var rol = user.getAuthorities()
+                .stream()
+                .anyMatch(role -> role.getAuthority().equalsIgnoreCase("role_admin"));
+
+        if (rol) {
+            return repository.findAll(pageable).map(mapper::toResponse);
+        } else {
+            return repository.findAllByUserApp(pageable, user).map(mapper::toResponse);
+        }
     }
 
     @Override
