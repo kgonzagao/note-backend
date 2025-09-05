@@ -7,11 +7,9 @@ import com.kgonzaga.note.app.presentation.dto.RefreshTokenRequest;
 import com.kgonzaga.note.app.presentation.dto.UserCreateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,5 +34,16 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-admin")
+    public ResponseEntity<Object> checkAdmin(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Authorization header is missing or blank");
+        }
+        boolean isValid = authService.checkTokenAdmin(authorizationHeader);
+        return ResponseEntity.ok(isValid);
     }
 }

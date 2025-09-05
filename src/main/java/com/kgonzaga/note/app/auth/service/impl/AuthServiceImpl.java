@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -62,5 +63,22 @@ public class AuthServiceImpl implements AuthService {
         String newAccessToken = jwtService.generateAccessToken(user);
 
         return new AuthResponse("Bearer", newAccessToken, refreshToken);
+    }
+
+    @Override
+    public boolean checkTokenAdmin(String token) {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        var username = jwtService.extractUsername(token);
+        var user = userService.loadUserByUsername(username);
+
+        if (!jwtService.isTokenValid(token, user)) {
+            return false;
+        }
+        return user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN"));
+
     }
 }
