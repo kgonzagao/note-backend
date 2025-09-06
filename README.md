@@ -83,13 +83,14 @@ Este proyecto fue desarrollado como parte del curso de Udemy:
 📘 [Master Completo en Java de cero a experto](https://www.udemy.com/course/master-completo-java-de-cero-a-experto/?couponCode=KEEPLEARNING)  
 👨‍🏫 [Instructor: Andrés Guzmán](https://www.linkedin.com/in/andresguzf/)
 
+## ⚖️ Licencia
+
+Este proyecto está bajo la Licencia Apache 2.0.
+
 ---
 
 
 ## Vistas de la aplicación
-
-### 🟢 Página de registro
-![Registro](images/register.png)
 
 ### 🔐 Página de login
 ![Login](images/login.png)
