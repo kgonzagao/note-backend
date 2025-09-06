@@ -64,13 +64,13 @@ src/
 
 ## 📡 Endpoints
 
-- `/api/auth/register` - Registro de usuarios.
-- `/api/auth/login` - Autenticación de usuarios.
-- `/api/auth/refresh` - Actualizacion de Access Token.
-- `/api/auth/check-admin` - Verificación de usuarios administrador.
-- `/api/notes` - CRUD de notas.
-- `/api/users` - Gestión de usuarios.
-- `/api/roles` - Gestión de roles.
+- `/api/v1/auth/register` - Registro de usuarios.
+- `/api/v1/auth/login` - Autenticación de usuarios.
+- `/api/v1/auth/refresh` - Actualizacion de Access Token.
+- `/api/v1/auth/check-admin` - Verificación de usuarios administrador.
+- `/api/v1/notes` - CRUD de notas.
+- `/api/v1/users` - Gestión de usuarios.
+- `/api/v1/roles` - Gestión de roles.
 
 ## 🤝 Contribuciones
 
